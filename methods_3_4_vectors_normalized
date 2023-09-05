@@ -179,12 +179,12 @@ for key, value in insignificant_compounds.items():
             if len(min_index) == n:
                 break
 
-        # closest 3 - method 3
+        # closest 3
         # if len(min_index) == 0:
         #     for index in range(n):
         #         min_index.append(indexes[index])
 
-        # closest 3 w/ exceptions - method 4
+        # closest 3 w/ exceptions
         if len(min_index) == 0:
             for index in range(n):
                 if distances[indexes[index]] < av_distance/3:
