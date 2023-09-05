@@ -213,9 +213,21 @@ for system in systems:
             min_lengths, length_sorted = [], []
             length_sorted = sorted(lengths)
             min_index = []
+            #3 CLOSEST WITH EXCEPTIONS
             for i in range(3):
                 min_lengths.append(length_sorted[i])
                 min_index.append(lengths.index(length_sorted[i]))
+        
+            #3 CLOSEST WITH EXCEPTIONS
+            #av_l = sum(lengths) / (len(lengths) * 3)
+            #for i in range(3):
+            #    if length_sorted[i] <= av_l:
+            #        min_lengths.append(length_sorted[i])
+            #        min_index.append(lengths.index(length_sorted[i]))
+            #if len(min_lengths) == 0:
+            #    min_lengths.append(length_sorted[0])
+            #    min_index.append(lengths.index(length_sorted[0]))
+
 
             start_values, end_values = [], []
             for i in min_index:
