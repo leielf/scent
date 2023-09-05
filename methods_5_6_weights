@@ -183,7 +183,6 @@ for j in range(len(output_insign)):
 
     min_lengths, length_sorted = [], []
     length_sorted = sorted(lengths)
-    av_l = sum(lengths) / (len(lengths) * 3)
     min_index = []
     #5 CLOSEST
     for i in range(5):
