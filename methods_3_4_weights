@@ -1,0 +1,236 @@
+import matplotlib.pyplot as plt
+import math
+import os
+import numpy as np
+import matplotlib.ticker as ticker
+
+
+def add_compound(compound_list, comp_name, t1, t2, indicator):
+    if comp_name not in compound_list:
+        compound_list[comp_name] = [[], []]
+    if indicator == 1:
+        compound_list[comp_name][0].insert(0, t1)
+        compound_list[comp_name][1].insert(0, t2)
+    else:
+        compound_list[comp_name][0].append(t1)
+        compound_list[comp_name][1].append(t2)
+
+
+def coordinates(x_list, y_list, length_comp):
+    list_coord = []
+    for i in range(length_comp):
+        list_coord.append([x_list[i], y_list[i]])
+    return list_coord
+
+
+def create_list(lst1, lst2, n):
+    output = [[], []]
+    for i in range(len(lst1)):
+        output[0].append(lst1[i][n])
+        output[1].append(lst2[i][n])
+    return output
+
+
+def length(vec):
+    return math.sqrt(((vec[0]/250) ** 2) + (vec[1] ** 2))
+
+
+def inTriangle(x1, y1, x2, y2, x3, y3, x, y):
+    det = (y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3)
+    if det == 0:
+        return False
+    a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / det
+    b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / det
+    c = 1 - a - b
+    return 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1
+
+
+path = '/Users/jackie.moonshot/Downloads/TA_dataset'
+os.chdir(path)
+significant_compounds, insignificant_compounds = {}, {}
+insignificant_predicted = {}
+sign_start, sign_end, sign_x_values, sign_y_values, insign_x_values, insign_y_values, insign_predicted = [], [], [[], []], [[], []], [[], []], [[], []], [[], []]
+significant_names = [
+    'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-', '2,5-pyrrolidinedione, 3-dodecyl-',
+    '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+    '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester',
+    '9-Hexadecenoic acid, hexadecyl ester',
+    'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester',
+    'Nonacosane', '1-Dodecanol', 'Dodecane, 1-chloro-', 'Dodecanamide, N-allyl-', '2,5-pyrrolidinedione, 3-hexadecyl-',
+    'Fumaric acid, 2-dimethylaminoethyl heptyl ester', 'Cholesta-3,5-diene (izomer 2)',
+    'Cholesta-3,5-dien-7-one', 'Cholesta-4,6-dien-3-one', 'Cholest-4-en-3-one', 'Hexadecanoic acid, octadecyl ester']
+first_file = 'M1_01'
+second_file = 'M1_33'
+indicator = 2
+
+for root, dirs, files in os.walk(path):
+    for file in files:
+        if file.endswith('.txt'):
+            file_path = os.path.join(root, file)
+            with open(file_path, 'r') as f:
+                file_name = os.path.basename(file_path)
+                if first_file in file_name or second_file in file_name:
+                    if first_file in file_name:
+                        indicator = 1
+                    else:
+                        indicator = 2
+                    next(f)
+                    for line in f:
+                        line_info = line.rsplit()
+                        compound_name = str(line_info[0])
+                        n = 1
+                        time1 = 0
+                        while time1 == 0:
+                            while True:
+                                try:
+                                    time1 = int(line_info[n])
+                                    break
+                                except ValueError:
+                                    compound_name = compound_name + ' ' + line_info[n]
+                                    n += 1
+                        if time1 == 1 or time1 == 2:
+                            compound_name += ' ' + str(time1)
+                            time1 = int(line_info[n + 1])
+                            time2 = float(line_info[n + 2].replace(',', '.'))
+                        else:
+                            time2 = float(line_info[n + 1].replace(',', '.'))
+                        if compound_name in significant_names:
+                            add_compound(significant_compounds, compound_name, time1, time2, indicator)
+                        else:
+                            add_compound(insignificant_compounds, compound_name, time1, time2, indicator)
+
+for key, value in significant_compounds.items():
+    sign_x_values[0].append(value[0][0])
+    sign_y_values[0].append(value[1][0])
+    if len(value[0]) > 1:
+        sign_x_values[1].append(value[0][1])
+        sign_y_values[1].append(value[1][1])
+        sign_start.append([value[0][0], value[1][0]])
+        sign_end.append([value[0][1], value[1][1]])
+
+for key, value in insignificant_compounds.items():
+    insign_x_values[0].append(value[0][0])
+    insign_y_values[0].append(value[1][0])
+    if len(value[0]) > 1:
+        insign_x_values[1].append(value[0][1])
+        insign_y_values[1].append(value[1][1])
+number_in_triangle = 0
+for key, value in insignificant_compounds.items():
+    isInItriangle = False
+    if len(value[0]) > 1:
+        start_point = [value[0][0], value[1][0]]
+
+        # distances from an insignificant start point to significant start points
+        distances_norm = []
+        for dot in sign_start:
+            vector = [dot[0] - start_point[0], dot[1] - start_point[1]]
+            distances_norm.append(length(vector))
+
+        av_distance_norm = sum(distances_norm) / len(distances_norm)
+
+        coordinates_by_distances = [[], []]
+        points_in_triangle_x, points_in_triangle_y = [], []
+        triangle_points = []
+        abc = []
+        n = 3
+        min_distances = []
+        min_index = []
+        distances_ascending = np.sort(distances_norm)
+        indexes = []
+        for distance in distances_ascending:
+            indexes.append(distances_norm.index(distance))
+            coordinates_by_distances[0].append(sign_start[distances_norm.index(distance)][0])
+            coordinates_by_distances[1].append(sign_start[distances_norm.index(distance)][1])
+
+        for i in range(len(indexes) - 2):
+            if distances_ascending[i] < av_distance_norm/2:
+                for j in range(i + 1, len(indexes) - 1):
+                    if len(min_index) > 0:
+                        break
+                    if distances_ascending[j] < av_distance_norm/2:
+                        for k in range(j+1, len(indexes)):
+                            if inTriangle(sign_start[indexes[i]][0], sign_start[indexes[i]][1], sign_start[indexes[j]][0], sign_start[indexes[j]][1], sign_start[indexes[k]][0], sign_start[indexes[k]][1], start_point[0], start_point[1]) \
+                                    and distances_ascending[k] < av_distance_norm/2:
+                                number_in_triangle += 1
+                                min_index.append(indexes[i])
+                                min_index.append(indexes[j])
+                                min_index.append(indexes[k])
+                                min_distances.append(distances_ascending[i])
+                                min_distances.append(distances_ascending[j])
+                                min_distances.append(distances_ascending[k])
+                                points_in_triangle_x.append(value[0][0])
+                                points_in_triangle_x.append(sign_start[indexes[i]][0])
+                                points_in_triangle_x.append(sign_start[indexes[j]][0])
+                                points_in_triangle_x.append(sign_start[indexes[k]][0])
+                                points_in_triangle_y.append(value[1][0])
+                                points_in_triangle_y.append(sign_start[indexes[i]][1])
+                                points_in_triangle_y.append(sign_start[indexes[j]][1])
+                                points_in_triangle_y.append(sign_start[indexes[k]][1])
+                                triangle_points.append(
+                                    [sign_start[indexes[i]][0], sign_start[indexes[j]][0], sign_start[indexes[k]][0],
+                                     sign_start[indexes[i]][0]])
+                                triangle_points.append(
+                                    [sign_start[indexes[i]][1], sign_start[indexes[j]][1], sign_start[indexes[k]][1],
+                                     sign_start[indexes[i]][1]])
+                                break
+            if len(min_index) == n:
+                break
+                
+        # closest 3
+        # if len(min_index) == 0:
+        #     for index in range(n):
+        #         min_index.append(indexes[index])
+        #         min_distances.append(distances_ascending[index])
+
+        # closest 3 with exceptions
+        if len(min_index) == 0:
+            for index in range(n):
+                if distances_ascending[index] < av_distance_norm/3:
+                    min_index.append(indexes[index])
+                    min_distances.append(distances_ascending[index])
+        if len(min_index) == 0:
+            min_index.append(indexes[0])
+            min_distances.append(distances_ascending[0])
+
+        start_values, end_values = [], []  # not normalized
+        for i in min_index:
+            start_values.append([sign_x_values[0][i], sign_y_values[0][i]])
+            end_values.append([sign_x_values[1][i], sign_y_values[1][i]])
+
+        abc1 = []
+        s = sum(min_distances)
+        for d in min_distances:
+            if len(min_distances) == 3:
+                abc1.append((s - d)/(2*s))
+            elif len(min_distances) == 2:
+                abc1.append((s - d) / s)
+            else:
+                abc1.append(1)
+        x, y = 0, 0
+
+        for i in range(len(end_values)):
+            x += abc1[i] * (start_point[0] - start_values[i][0] + end_values[i][0])
+            y += abc1[i] * (start_point[1] - start_values[i][1] + end_values[i][1])
+
+        add_compound(insignificant_predicted, key, start_point[0], start_point[1], 2)
+        add_compound(insignificant_predicted, key, x, y, 2)
+        insign_predicted[0].append(x)
+        insign_predicted[1].append(y)
+
+fig, ax = plt.subplots()
+ax.scatter(sign_x_values[0], sign_y_values[0], s=10, marker="o", color="g", alpha=0.6, edgecolor='black', linewidths=0.1)
+ax.scatter(sign_x_values[1], sign_y_values[1], s=40, marker="*", color="g", alpha=0.8, edgecolor='black', linewidths=0.1)
+ax.scatter(insign_x_values[0], insign_y_values[0], s=10, marker="o", color="r", alpha=0.6, edgecolor='black', linewidths=0.1)
+ax.scatter(insign_x_values[1], insign_y_values[1], s=20, marker="o", color="b", alpha=0.6, edgecolor='black', linewidths=0.1)
+ax.scatter(insign_predicted[0], insign_predicted[1], s=40, marker="*", color="r", alpha=0.8, edgecolor='black', linewidths=0.1)
+ax.legend(["significant, start", "significant, end", "insignificant, start", "insignificant, original end", "insignificant, predicted end"])
+for key, value in significant_compounds.items():
+    ax.plot(value[0], value[1], linestyle="dashed", color="g")
+for key, value in insignificant_predicted.items():
+    ax.plot(value[0], value[1], linestyle="dashed", color="r")
+
+ax.set_xlabel('1st dimension')
+ax.set_ylabel('2nd dimension')
+ax.set_title('shift prediction/in a triangle')
+ax.grid(True)
+plt.show()
