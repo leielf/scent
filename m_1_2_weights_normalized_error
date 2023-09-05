@@ -31,8 +31,7 @@ def create_list(lst1, lst2, n):
     return output
 
 def length(vector):
-    return math.sqrt(vector[1]**2 + vector[0]**2)
-
+    return math.sqrt(vector[1] ** 2 + (vector[0]/250) ** 2)
 
 
 names_system1 = [['F1_01', 'F1_07'], ['F10_01', 'F10_08'], ['F11_01', 'F11_08'], ['F12_01', 'F12_08'], ['F13_01', 'F13_07'],
