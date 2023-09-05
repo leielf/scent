@@ -21,7 +21,7 @@ def length(vector):
     return math.sqrt(vector[1]**2 + (vector[0]/250)**2)
 
 
-path = '/Users/leielf/Downloads/TA_dataset'
+path = 'insert here path to the folder'
 os.chdir(path)
 index, insign_index = 0, 0
 input_points, output_points, names, insign_names = [], [], [], []
