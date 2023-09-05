@@ -1,0 +1,282 @@
+import matplotlib.pyplot as plt
+import math
+import os
+import numpy as np
+import matplotlib.ticker as ticker
+
+
+def add_compound(compound_list, comp_name, t1, t2, indicator):
+    if comp_name not in compound_list:
+        compound_list[comp_name] = [[], []]
+    if indicator == 1:
+        compound_list[comp_name][0].insert(0, t1)
+        compound_list[comp_name][1].insert(0, t2)
+    else:
+        compound_list[comp_name][0].append(t1)
+        compound_list[comp_name][1].append(t2)
+
+
+def coordinates(x_list, y_list, length_comp):
+    list_coord = []
+    for i in range(length_comp):
+        list_coord.append([x_list[i], y_list[i]])
+    return list_coord
+
+
+def create_list(lst1, lst2, n):
+    output = [[], []]
+    for i in range(len(lst1)):
+        output[0].append(lst1[i][n])
+        output[1].append(lst2[i][n])
+    return output
+
+
+def length(vec):
+    return math.sqrt(((vec[0]/250) ** 2) + (vec[1] ** 2))
+
+
+def inTriangle(x1, y1, x2, y2, x3, y3, x, y):
+    det = (y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3)
+    if det == 0:
+        return False
+    a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / det
+    b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / det
+    c = 1 - a - b
+    return 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1
+
+names_system1 = [['F1_01', 'F1_07'], ['F10_01', 'F10_08'], ['F11_01', 'F11_08'], ['F12_01', 'F12_08'], ['F13_01', 'F13_07'],
+                 ['F14_01', 'F14_08'], ['F15_01', 'F15_07'], ['F16_01', 'F16_06'], ['F17_01', 'F17_07'], ['F18_01', 'F18_06'], ['F19_01', 'F19_05'],
+                 ['F2_01', 'F2_06'], ['F20_01', 'F20_05'], ['F3_01', 'F3_08'], ['F4_01', 'F4_07'], ['F5_01', 'F5_08'], ['F6_01', 'F6_08'],
+                 ['F7_01', 'F7_08'], ['F8_01', 'F8_07'], ['F9_01', 'F9_07'], ['M1_01', 'M1_08'], ['M10_01', 'M10_08'], ['M11_01', 'M11_07'], ['M12_01', 'M12_04'],
+                 ['M13_01', 'M13_07'], ['M14_01', 'M14_07'], ['M15_01', 'M15_06'], ['M16_01', 'M16_06'], ['M17_01', 'M17_06'], ['M18_01', 'M18_06'],
+                 ['M19_01', 'M19_06'], ['M2_01', 'M2_05'], ['M20_02', 'M20_06'], ['M3_01', 'M3_08'], ['M4_01', 'M4_07'], ['M5_01', 'M5_08'], ['M6_01', 'M6_07'],
+                 ['M7_01', 'M7_06'], ['M8_01', 'M8_08'], ['M9_01', 'M9_08']]
+
+names_system2 = [['F1_08', 'F1_10'], ['F10_09', 'F10_10'], ['F11_09', 'F11_10'], ['F12_09', 'F12_10'], ['F13_08', 'F13_10'],
+                 ['F14_10', 'F14_14'], ['F15_08', 'F15_14'], ['F16_07', 'F16_10'], ['F17_08', 'F17_10'], ['F18_07', 'F18_11'], ['F19_06', 'F19_09'],
+                 ['F2_07', 'F2_10'], ['F20_06', 'F20_09'], ['F3_09', 'F3_10'], ['F4_08', 'F4_10'], ['F5_09', 'F5_14'], ['F6_09', 'F6_10'],
+                 ['F7_09', 'F7_10'], ['F8_08', 'F8_10'], ['F9_08', 'F9_10'], ['M1_09', 'M1_15'], ['M10_09', 'M10_10'], ['M11_08', 'M11_10'], ['M12_05', ''],
+                 ['M13_08', 'M13_10'], ['M14_08', 'M14_10'], ['M15_07', 'M15_10'], ['M16_07', 'M16_10'], ['M17_07', 'M17_10'], ['M18_07', 'M18_10'],
+                 ['M19_07', 'M19_10'], ['M2_06', 'M2_10'], ['M20_07', 'M20_10'], ['M3_09', 'M3_10'], ['M4_08', 'M4_10'], ['M5_09', 'M5_10'], ['M6_08', 'M6_10'],
+                 ['M7_07', 'M7_10'], ['M8_09', 'M8_10'], ['M9_09', 'M9_10']]
+
+names_system3 = [['F14_15', 'F14_18'], ['F15_15', 'F15_31'], ['F18_12', 'F18_15'],
+                 ['F19_10', ''], ['F20_10', ''], ['F5_15', 'F5_28'], ['F7_11', 'F7_37'], ['F8_11', ''], ['F9_11', ''], ['M1_16', 'M1_33'],
+                 ['M12_06', 'M12_10']]
+
+x_list, y_list, add_x, add_y = [], [], [], []
+
+each_person = []
+for name in names_system1:
+    for name2 in names_system2:
+        if name[0][0:3] in name2[0]:
+            if name2[1] != '':
+                each_person.append([name[0], name2[1]])
+            else:
+                each_person.append([name[0], name2[0]])
+    for name3 in names_system3:
+        if name[0][0:3] in name3[0]:
+            if name3[1] != '':
+                each_person[names_system1.index(name)][1] = name3[1]
+            else:
+                each_person[names_system1.index(name)][1] = name3[0]
+
+av_x_list, av_y_list, av_list = [], [], []
+
+system_av_x, system_av_y = [], []
+systems = [names_system1, names_system2, names_system3]
+for system in systems:
+    add_x, add_y = [], []
+
+    for f_names in system:
+        path = '/Users/leielf/Downloads/TA_dataset'
+        os.chdir(path)
+        significant_compounds, insignificant_compounds = {}, {}
+        insignificant_predicted = {}
+        sign_start, sign_end, sign_x_values, sign_y_values, insign_x_values, insign_y_values, insign_predicted = [], [], [
+            [], []], [[], []], [[], []], [[], []], [[], []]
+        points_in_triangle_x, points_in_triangle_y = [], []
+        #24 SIGNIFICANT COMPOUNDS
+        significant_names = [
+            'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-',
+            '2,5-pyrrolidinedione, 3-dodecyl-',
+            '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+            '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester',
+            '9-Hexadecenoic acid, hexadecyl ester',
+            'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester',
+            'Nonacosane', '1-Dodecanol', 'Dodecane, 1-chloro-', 'Dodecanamide, N-allyl-',
+            '2,5-pyrrolidinedione, 3-hexadecyl-',
+            'Fumaric acid, 2-dimethylaminoethyl heptyl ester', 'Cholesta-3,5-diene (izomer 2)',
+            'Cholesta-3,5-dien-7-one', 'Cholesta-4,6-dien-3-one', 'Cholest-4-en-3-one',
+            'Hexadecanoic acid, octadecyl ester']
+        #13 COMPOUNDS
+        # significant_names = [
+        #     'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-',
+        #     '2,5-pyrrolidinedione, 3-dodecyl-',
+        #     '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+        #     '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester',
+        #     '9-Hexadecenoic acid, hexadecyl ester',
+        #     'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester']
+
+        first_file = f_names[0]
+        second_file = f_names[1]
+        indicator = 2
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.endswith('.txt'):
+                    file_path = os.path.join(root, file)
+                    with open(file_path, 'r') as f:
+                        file_name = os.path.basename(file_path)
+                        if first_file in file_name or second_file in file_name:
+                            if first_file in file_name:
+                                indicator = 1
+                            else:
+                                indicator = 2
+                            next(f)
+                            for line in f:
+                                line_info = line.rsplit()
+                                compound_name = str(line_info[0])
+                                n = 1
+                                time1 = 0
+                                while time1 == 0:
+                                    while True:
+                                        try:
+                                            time1 = int(line_info[n])
+                                            break
+                                        except ValueError:
+                                            compound_name = compound_name + ' ' + line_info[n]
+                                            n += 1
+                                if time1 == 1 or time1 == 2:
+                                    compound_name += ' ' + str(time1)
+                                    time1 = int(line_info[n + 1])
+                                    time2 = float(line_info[n + 2].replace(',', '.'))
+                                else:
+                                    time2 = float(line_info[n + 1].replace(',', '.'))
+
+                                if compound_name in significant_names:
+                                    add_compound(significant_compounds, compound_name, time1, time2, indicator)
+                                else:
+                                    add_compound(insignificant_compounds, compound_name, time1, time2, indicator)
+
+        for key, value in significant_compounds.items():
+            sign_x_values[0].append(value[0][0])
+            sign_y_values[0].append(value[1][0])
+            if len(value[0]) > 1:
+                sign_x_values[1].append(value[0][1])
+                sign_y_values[1].append(value[1][1])
+                sign_start.append([value[0][0], value[1][0]])
+                sign_end.append([value[0][1], value[1][1]])
+
+        for key, value in insignificant_compounds.items():
+            insign_x_values[0].append(value[0][0])
+            insign_y_values[0].append(value[1][0])
+            if len(value[0]) > 1:
+                insign_x_values[1].append(value[0][1])
+                insign_y_values[1].append(value[1][1])
+
+        for key, value in insignificant_compounds.items():
+            insign_x_values[0].append(value[0][0])
+            insign_y_values[0].append(value[1][0])
+            if len(value[0]) > 1:
+                insign_x_values[1].append(value[0][1])
+                insign_y_values[1].append(value[1][1])
+        number_in_triangle = 0
+        for key, value in insignificant_compounds.items():
+            isInItriangle = False
+            if len(value[0]) > 1:
+                start_point = [value[0][0], value[1][0]]
+
+                # distances from an insignificant start point to significant start points
+                distances_norm = []
+                for dot in sign_start:
+                    vector = [dot[0] - start_point[0], dot[1] - start_point[1]]
+                    distances_norm.append(length(vector))
+
+                av_distance_norm = sum(distances_norm) / len(distances_norm)
+                abc = []
+                n = 3
+                min_distances = []
+                min_index = []
+                distances_ascending = np.sort(distances_norm)
+                indexes = []
+                for distance in distances_ascending:
+                    indexes.append(distances_norm.index(distance))
+
+                for i in range(len(indexes) - 2):
+                    if distances_ascending[i] < av_distance_norm / 3:
+                        for j in range(i + 1, len(indexes) - 1):
+                            if len(min_index) > 0:
+                                break
+                            if distances_ascending[j] < av_distance_norm / 3:
+                                for k in range(j + 1, len(indexes)):
+                                    if inTriangle(sign_start[indexes[i]][0], sign_start[indexes[i]][1],
+                                                  sign_start[indexes[j]][0], sign_start[indexes[j]][1],
+                                                  sign_start[indexes[k]][0], sign_start[indexes[k]][1], start_point[0],
+                                                  start_point[1]) \
+                                            and distances_ascending[k] < av_distance_norm / 2:
+                                        number_in_triangle += 1
+                                        min_index.append(indexes[i])
+                                        min_index.append(indexes[j])
+                                        min_index.append(indexes[k])
+                                        min_distances.append(distances_ascending[i])
+                                        min_distances.append(distances_ascending[j])
+                                        min_distances.append(distances_ascending[k])
+                                        break
+                    if len(min_index) == n:
+                        break
+
+                #3 closest
+                if len(min_index) == 0:
+                    for index in range(n):
+                        min_index.append(indexes[index])
+                        min_distances.append(distances_ascending[index])
+                #3 closest with exceptions
+                # if len(min_index) == 0:
+                #     for index in range(n):
+                #         if distances_ascending[index] < av_distance_norm / 3:
+                #             min_index.append(indexes[index])
+                #             min_distances.append(distances_ascending[index])
+                # if len(min_index) == 0:
+                #     min_index.append(indexes[0])
+                #     min_distances.append(distances_ascending[0])
+
+                start_values, end_values = [], []  # not normalized
+                for i in min_index:
+                    start_values.append([sign_x_values[0][i], sign_y_values[0][i]])
+                    end_values.append([sign_x_values[1][i], sign_y_values[1][i]])
+
+                abc1 = []
+                s = sum(min_distances)
+                for d in min_distances:
+                    if len(min_distances) == 3:
+                        abc1.append((s - d) / (2 * s))
+                    elif len(min_distances) == 2:
+                        abc1.append((s - d) / s)
+                    else:
+                        abc1.append(1)
+                x, y = 0, 0
+
+                for i in range(len(end_values)):
+                    x += abc1[i] * (start_point[0] - start_values[i][0] + end_values[i][0])
+                    y += abc1[i] * (start_point[1] - start_values[i][1] + end_values[i][1])
+
+                add_compound(insignificant_predicted, key, start_point[0], start_point[1], 2)
+                add_compound(insignificant_predicted, key, x, y, 2)
+                insign_predicted[0].append(x)
+                insign_predicted[1].append(y)
+
+        for x in range(len(insign_predicted[0])):
+            av_x = insign_predicted[0][x] / insign_x_values[1][x]
+            add_x.append(insign_predicted[0][x] - insign_x_values[1][x])
+            x_list.append(av_x)
+            av_y = insign_predicted[1][x] / insign_y_values[1][x]
+            add_y.append(insign_predicted[1][x] - insign_y_values[1][x])
+            y_list.append(av_y)
+
+    dif_x = abs(sum(add_x)/len(add_x))
+    system_av_x.append(dif_x)
+    dif_y = abs(sum(add_y)/len(add_y))
+    system_av_y.append(dif_y)
+
+    print('system', systems.index(system)+1, '\nt1:', round(dif_x, 5), '\nt2:', round(dif_y, 5))
+print('av:\nt1:', round(sum(system_av_x)/3, 3), '\nt2:', round(sum(system_av_y)/3, 3))
