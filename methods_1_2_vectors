@@ -27,6 +27,7 @@ index, insign_index = 0, 0
 input_points, output_points, names, insign_names = [], [], [], []
 x_values, y_values = [[],[]], [[],[]]
 input_insign, output_insign = [], []
+#24 SIGNIFICANT COMPOUNDS
 significant_names = [
 'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-', '2,5-pyrrolidinedione, 3-dodecyl-',
     '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
@@ -35,6 +36,13 @@ significant_names = [
     'Nonacosane', '1-Dodecanol', 'Dodecane, 1-chloro-', 'Dodecanamide, N-allyl-', '2,5-pyrrolidinedione, 3-hexadecyl-',
     'Fumaric acid, 2-dimethylaminoethyl heptyl ester', 'Cholesta-3,5-diene (izomer 2)',
     'Cholesta-3,5-dien-7-one', 'Cholesta-4,6-dien-3-one', 'Cholest-4-en-3-one', 'Hexadecanoic acid, octadecyl ester']
+
+#13 SIGNIFICANT COMPOUNDS
+#significant_names = [
+#'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-', '2,5-pyrrolidinedione, 3-dodecyl-',
+#    '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+#    '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester', '9-Hexadecenoic acid, hexadecyl ester',
+#    'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester']
 
 
 first_file = 'F1_01'
@@ -164,9 +172,21 @@ for j in range(len(output_insign)):
     min_lengths, length_sorted = [], []
     length_sorted = sorted(lengths)
     min_index = []
+    #3 CLOSEST WITH EXCEPTIONS
     for i in range(3):
         min_lengths.append(length_sorted[i])
         min_index.append(lengths.index(length_sorted[i]))
+
+    #3 CLOSEST WITH EXCEPTIONS
+    #av_l = sum(lengths) / (len(lengths) * 3)
+    #for i in range(3):
+    #    if length_sorted[i] <= av_l:
+    #        min_lengths.append(length_sorted[i])
+    #        min_index.append(lengths.index(length_sorted[i]))
+    #if len(min_lengths) == 0:
+    #    min_lengths.append(length_sorted[0])
+    #    min_index.append(lengths.index(length_sorted[0]))
+
 
     start_values, end_values = [], []
     for i in min_index:
