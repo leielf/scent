@@ -181,6 +181,7 @@ for j in range(len(output_insign)):
         min_index.append(lengths.index(length_sorted[i]))
 
     #5 CLOSEST WITH EXCEPTIONS
+    #av_l = sum(lengths) / (len(lengths) * 3)
     #for i in range(5):
     #    if length_sorted[i] <= av_l:
     #        min_lengths.append(length_sorted[i])
