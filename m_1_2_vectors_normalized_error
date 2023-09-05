@@ -1,0 +1,324 @@
+import math
+import matplotlib.pyplot as plt
+import os
+import matplotlib.ticker as ticker
+import numpy as np
+
+def normalize(lst, input_lst):
+    for i in range(2):
+        for value in input_lst[i]:
+            lst[i].append((value - min(input_lst[i]))/(max(input_lst[i]) - min(input_lst[i])))
+
+def create_lst_x_y(x_norm, y_norm):
+    lst_norm = []
+    for i in range(len(x_norm)):
+        lst_norm.append([x_norm[i], y_norm[i]])
+    return lst_norm
+
+
+def coordinates(x_list, y_list, length):
+    list_coord = []
+    for i in range(length):
+        list_coord.append([x_list[i], y_list[i]])
+    return list_coord
+
+def create_list(lst1, lst2, n):
+    output = [[], []]
+    for i in range(len(lst1)):
+        output[0].append(lst1[i][n])
+    for i in range(len(lst2)):
+        output[1].append(lst2[i][n])
+    return output
+
+def length(vector):
+    return math.sqrt(vector[1]**2 + vector[0]**2)
+
+
+
+names_system1 = [['F1_01', 'F1_07'], ['F10_01', 'F10_08'], ['F11_01', 'F11_08'], ['F12_01', 'F12_08'], ['F13_01', 'F13_07'],
+                 ['F14_01', 'F14_08'], ['F15_01', 'F15_07'], ['F16_01', 'F16_06'], ['F17_01', 'F17_07'], ['F18_01', 'F18_06'], ['F19_01', 'F19_05'],
+                 ['F2_01', 'F2_06'], ['F20_01', 'F20_05'], ['F3_01', 'F3_08'], ['F4_01', 'F4_07'], ['F5_01', 'F5_08'], ['F6_01', 'F6_08'],
+                 ['F7_01', 'F7_08'], ['F8_01', 'F8_07'], ['F9_01', 'F9_07'], ['M1_01', 'M1_08'], ['M10_01', 'M10_08'], ['M11_01', 'M11_07'], ['M12_01', 'M12_04'],
+                 ['M13_01', 'M13_07'], ['M14_01', 'M14_07'], ['M15_01', 'M15_06'], ['M16_01', 'M16_06'], ['M17_01', 'M17_06'], ['M18_01', 'M18_06'],
+                 ['M19_01', 'M19_06'], ['M2_01', 'M2_05'], ['M20_02', 'M20_06'], ['M3_01', 'M3_08'], ['M4_01', 'M4_07'], ['M5_01', 'M5_08'], ['M6_01', 'M6_07'],
+                 ['M7_01', 'M7_06'], ['M8_01', 'M8_08'], ['M9_01', 'M9_08']]
+
+names_system2 = [['F1_08', 'F1_10'], ['F10_09', 'F10_10'], ['F11_09', 'F11_10'], ['F12_09', 'F12_10'], ['F13_08', 'F13_10'],
+                 ['F14_10', 'F14_14'], ['F15_08', 'F15_14'], ['F16_07', 'F16_10'], ['F17_08', 'F17_10'], ['F18_07', 'F18_11'], ['F19_06', 'F19_09'],
+                 ['F2_07', 'F2_10'], ['F20_06', 'F20_09'], ['F3_09', 'F3_10'], ['F4_08', 'F4_10'], ['F5_09', 'F5_14'], ['F6_09', 'F6_10'],
+                 ['F7_09', 'F7_10'], ['F8_08', 'F8_10'], ['F9_08', 'F9_10'], ['M1_09', 'M1_15'], ['M10_09', 'M10_10'], ['M11_08', 'M11_10'], ['M12_05', ''],
+                 ['M13_08', 'M13_10'], ['M14_08', 'M14_10'], ['M15_07', 'M15_10'], ['M16_07', 'M16_10'], ['M17_07', 'M17_10'], ['M18_07', 'M18_10'],
+                 ['M19_07', 'M19_10'], ['M2_06', 'M2_10'], ['M20_07', 'M20_10'], ['M3_09', 'M3_10'], ['M4_08', 'M4_10'], ['M5_09', 'M5_10'], ['M6_08', 'M6_10'],
+                 ['M7_07', 'M7_10'], ['M8_09', 'M8_10'], ['M9_09', 'M9_10']]
+
+names_system3 = [['F14_15', 'F14_18'], ['F15_15', 'F15_31'], ['F18_12', 'F18_15'],
+                 ['F19_10', ''], ['F20_10', ''], ['F5_15', 'F5_28'], ['F7_11', 'F7_37'], ['F8_11', ''], ['F9_11', ''], ['M1_16', 'M1_33'],
+                 ['M12_06', 'M12_10']]
+
+each_person = []
+for name in names_system1:
+    for name2 in names_system2:
+        if name[0][0:3] in name2[0]:
+            if name2[1] != '':
+                each_person.append([name[0], name2[1]])
+            else:
+                each_person.append([name[0], name2[0]])
+    for name3 in names_system3:
+        if name[0][0:3] in name3[0]:
+            if name3[1] != '':
+                each_person[names_system1.index(name)][1] = name3[1]
+            else:
+                each_person[names_system1.index(name)][1] = name3[0]
+
+av_x_list, av_y_list, av_list = [], [], []
+system_av_x, system_av_y = [], []
+systems = [names_system1, names_system2, names_system3]
+for system in systems:
+    add_x, add_y = [], []
+    for f_names in system:
+        path = '/Users/leielf/Downloads/TA_dataset'
+        os.chdir(path)
+        index, insign_index = 0, 0
+        input_points, output_points, names, insign_names = [], [], [], []
+        x_values, y_values = [[], []], [[], []]
+        input_insign, output_insign = [], []
+        significant_names = [
+            'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-', '2,5-pyrrolidinedione, 3-dodecyl-',
+            '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+            '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester',
+            '9-Hexadecenoic acid, hexadecyl ester',
+            'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester',
+            'Nonacosane', '1-Dodecanol', 'Dodecane, 1-chloro-', 'Dodecanamide, N-allyl-',
+            '2,5-pyrrolidinedione, 3-hexadecyl-',
+            'Fumaric acid, 2-dimethylaminoethyl heptyl ester', 'Cholesta-3,5-diene (izomer 2)',
+            'Cholesta-3,5-dien-7-one', 'Cholesta-4,6-dien-3-one', 'Cholest-4-en-3-one',
+            'Hexadecanoic acid, octadecyl ester']
+
+        # 13 COMPOUNDS
+        # significant_names = [
+        #     'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-', '2,5-pyrrolidinedione, 3-dodecyl-',
+        #     '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+        #     '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester',
+        #     '9-Hexadecenoic acid, hexadecyl ester',
+        #     'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester']
+
+        first_file = f_names[0]
+        second_file = f_names[1]
+        files = ['', '']
+        for file in os.listdir():
+            if file.endswith(".txt") and first_file in file:
+                files[0] = f"{path}/{file}"
+            elif file.endswith(".txt") and second_file in file:
+                files[1] = f"{path}/{file}"
+
+        for file_path in files:
+            with open(file_path, 'r') as f:
+                contents = f.readlines()
+            contents.pop(0)
+            for line in contents:
+                lst = line.rsplit()
+                name = str(lst[0])
+                n = 1
+                frst_d = 0
+                while frst_d == 0:
+                    while True:
+                        try:
+                            frst_d = int(lst[n])
+                            break
+                        except ValueError:
+                            name = name + ' ' + lst[n]
+                            n += 1
+                    if frst_d < 10:
+                        frst_d = 0
+                        name = name + ' ' + lst[n]
+                        n += 1
+
+                snd_d = float(lst[n + 1].replace(',', '.'))
+                if name in significant_names:
+                    if first_file in file_path:
+                        names.append(name)
+                        input_points.append([frst_d, snd_d])
+                        x_values[0].append(frst_d)
+                        y_values[0].append(snd_d)
+                    else:
+                        if name not in names:
+                            names.append(name)
+                        if names.index(name) == index:
+                            output_points.append([frst_d, snd_d])
+                            x_values[1].append(frst_d)
+                            y_values[1].append(snd_d)
+                            index += 1
+                        elif names.index(name) > index:
+                            while index < names.index(name):
+                                output_points.append([0, 0])
+                                x_values[1].append(0)
+                                y_values[1].append(0)
+                                index += 1
+                            output_points.append([frst_d, snd_d])
+                            x_values[1].append(frst_d)
+                            y_values[1].append(snd_d)
+                            index += 1
+                        elif names.index(name) < index:
+                            output_points[names.index(name)] = [frst_d, snd_d]
+                            x_values[1][names.index(name)] = frst_d
+                            y_values[1][names.index(name)] = snd_d
+                else:
+                    if first_file in file_path:
+                        insign_names.append(name)
+                        input_insign.append([frst_d, snd_d])
+                    else:
+                        if name in insign_names:
+                            if insign_names.index(name) == insign_index:
+                                output_insign.append([frst_d, snd_d])
+                                insign_index += 1
+                            elif insign_names.index(name) > insign_index:
+                                while insign_index < insign_names.index(name):
+                                    output_insign.append([0, 0])
+                                    insign_index += 1
+                                output_insign.append([frst_d, snd_d])
+                                insign_index += 1
+                            elif insign_names.index(name) < insign_index:
+                                output_insign[insign_names.index(name)] = [frst_d, snd_d]
+
+        for i in range(len(x_values[1])):
+            if x_values[1][i] == 0:
+                x_values[1].pop(i)
+                y_values[1].pop(i)
+                input_points.append(input_points[i])
+                input_points.pop(i)
+                insign_names.append(insign_names[i])
+                insign_names.pop(i)
+                output_points.pop(i)
+                break
+
+        delete_index = []
+        for j in range(len(output_insign)):
+            if output_insign[j][0] == 0 or output_insign[j][1] == 0:
+                input_insign.append(input_insign[j])
+                delete_index.append(j)
+
+        n = 0
+        for i in range(len(delete_index)):
+            input_insign.pop(delete_index[i] - n)
+            output_insign.pop(delete_index[i] - n)
+            n += 1
+
+        x_insign = create_list(input_insign, output_insign, 0)
+        y_insign = create_list(input_insign, output_insign, 1)
+
+        x_values = create_list(input_points, output_points, 0)
+        y_values = create_list(input_points, output_points, 1)
+
+        x_values_norm, y_values_norm = [[], []], [[], []]
+        x_insign_norm, y_insign_norm = [[], []], [[], []]
+
+
+        normalize(x_values_norm, x_values)
+        normalize(y_values_norm, y_values)
+        normalize(x_insign_norm, x_insign)
+        normalize(y_insign_norm, y_insign)
+
+        input_points_norm = create_lst_x_y(x_values_norm[0], y_values_norm[0])
+        output_points_norm = create_lst_x_y(x_values_norm[1], y_values_norm[1])
+
+        input_insign_norm = create_lst_x_y(x_insign_norm[0], y_insign_norm[0])
+        output_insign_norm = create_lst_x_y(x_insign_norm[1], y_insign_norm[1])
+
+        x_difference, y_difference = [], []
+        y_final, x_final = [], []
+
+        rng = len(output_points_norm)
+        if len(output_points_norm) > len(input_points_norm):
+            rng = len(input_points_norm)
+
+
+        for j in range(len(output_insign_norm)):
+            input_point = input_insign_norm[j]
+
+            inp_p = input_insign[input_insign_norm.index(input_point)]
+            lengths = []
+            for dot in range(rng):
+                vector = [input_points_norm[dot][0] - input_point[0], input_points_norm[dot][1] - input_point[1]]
+                lengths.append(length(vector))
+
+            min_lengths, length_sorted = [], []
+            length_sorted = sorted(lengths)
+            min_index = []
+            #3 CLOSEST WITH EXCEPTIONS
+            for i in range(3):
+                min_lengths.append(length_sorted[i])
+                min_index.append(lengths.index(length_sorted[i]))
+        
+            #3 CLOSEST WITH EXCEPTIONS
+            #av_l = sum(lengths) / (len(lengths) * 3)
+            #for i in range(3):
+            #    if length_sorted[i] <= av_l:
+            #        min_lengths.append(length_sorted[i])
+            #        min_index.append(lengths.index(length_sorted[i]))
+            #if len(min_lengths) == 0:
+            #    min_lengths.append(length_sorted[0])
+            #    min_index.append(lengths.index(length_sorted[0]))
+
+
+            start_values, end_values = [], []
+            for i in min_index:
+                start_values.append(input_points[i])
+                end_values.append(output_points[i])
+
+            vectors = []
+            s = 0
+            for i in range(len(start_values)):
+                vector = [end_values[i][0] - start_values[i][0], end_values[i][1] - start_values[i][1]]
+                vectors.append(vector)
+                s += length(vector)
+
+            average = s / len(vectors)
+
+            d_x, d_y = [], []
+
+            for i in range(len(start_values) - 1):
+                if len(d_x) != 0:
+                    x = end_values[i][0] - start_values[i + 1][0] + d_x[i - 1]
+                    y = end_values[i][1] - start_values[i + 1][1] + d_y[i - 1]
+                else:
+                    x = end_values[i][0] - start_values[i + 1][0]
+                    y = end_values[i][1] - start_values[i + 1][1]
+                d_x.append(x)
+                d_y.append(y)
+
+            big_end_x, big_end_y = end_values[-1][0] + d_x[-1], end_values[-1][1] + d_y[-1]
+
+            big_start = start_values[0]
+            big_end = [big_end_x, big_end_y]
+            big_vec = [big_end[0] - big_start[0], big_end[1] - big_start[1]]
+            l_big = length(big_vec)
+
+            if l_big != 0:
+                if l_big > average:
+                    final = [average * big_vec[0] / l_big, average * big_vec[1] / l_big]
+                else:
+                    final = [l_big * big_vec[0] / average, l_big * big_vec[1] / average]
+                end_x = final[0] + inp_p[0]
+                end_y = final[1] + inp_p[1]
+            else:
+                end_x = inp_p[0]
+                end_y = inp_p[1]
+
+
+            x_final.append(end_x)
+            y_final.append(end_y)
+            actual_x = output_insign[input_insign_norm.index(input_point)][0]
+            actual_y = output_insign[input_insign_norm.index(input_point)][1]
+            
+            add_x.append(end_x - actual_x)
+            add_y.append(end_y - actual_y)
+
+      
+    dif_x = abs(sum(add_x) / len(add_x))
+    system_av_x.append(dif_x)
+    dif_y = abs(sum(add_y) / len(add_y))
+    system_av_y.append(dif_y)
+    
+    print('system', systems.index(system) + 1, '\nt1:', round(dif_x, 5), '\nt2:', round(dif_y, 5))
+print('av:\nt1:', round(sum(system_av_x) / 3, 3), '\nt2:', round(sum(system_av_y) / 3, 3))
+
