@@ -26,7 +26,7 @@ def create_list(lst1, lst2, n):
     return output
 
 def length(vector):
-    return math.sqrt(vector[1]**2 + (vector[0]/250)**2)
+    return math.sqrt(vector[1]**2 + vector[0]**2)
 
 
 
