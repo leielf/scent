@@ -1,0 +1,278 @@
+import math
+import matplotlib.pyplot as plt
+import os
+import matplotlib.ticker as ticker
+import numpy as np
+
+
+def barycentric_coordinates(A, B, C, P):
+    denominator = ((B[1] - C[1]) * (A[0] - C[0]) +
+                   (C[0] - B[0]) * (A[1] - C[1]))
+    a = ((B[1] - C[1]) * (P[0] - C[0]) +
+         (C[0] - B[0]) * (P[1] - C[1])) / denominator
+    b = ((C[1] - A[1]) * (P[0] - C[0]) +
+         (A[0] - C[0]) * (P[1] - C[1])) / denominator
+    c = 1 - a - b
+    lst_w = [a, b, c]
+    if a+b+c == 1:
+        return lst_w
+
+
+
+
+def normalize(lst, input_lst):
+    for i in range(2):
+        for value in input_lst[i]:
+            lst[i].append((value - min(input_lst[i]))/(max(input_lst[i]) - min(input_lst[i])))
+
+def create_lst_x_y(x_norm, y_norm):
+    lst_norm = []
+    for i in range(len(x_norm)):
+        lst_norm.append([x_norm[i], y_norm[i]])
+    return lst_norm
+
+def coordinates(x_list, y_list, length):
+    list_coord = []
+    for i in range(length):
+        list_coord.append([x_list[i], y_list[i]])
+    return list_coord
+
+def create_list(lst1, lst2, n):
+    output = [[], []]
+    for i in range(len(lst1)):
+        output[0].append(lst1[i][n])
+    for i in range(len(lst2)):
+        output[1].append(lst2[i][n])
+    return output
+
+def length(vector):
+    return math.sqrt(vector[1]**2 + vector[0]**2)
+
+
+path = '/Users/leielf/Downloads/TA_dataset'
+os.chdir(path)
+index, insign_index = 0, 0
+input_points, output_points, names, insign_names = [], [], [], []
+x_values, y_values = [[],[]], [[],[]]
+input_insign, output_insign = [], []
+#24 SIGNIFICANT COMPOUNDS
+significant_names = [
+'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-', '2,5-pyrrolidinedione, 3-dodecyl-',
+    '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+    '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester', '9-Hexadecenoic acid, hexadecyl ester',
+    'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester',
+    'Nonacosane', '1-Dodecanol', 'Dodecane, 1-chloro-', 'Dodecanamide, N-allyl-', '2,5-pyrrolidinedione, 3-hexadecyl-',
+    'Fumaric acid, 2-dimethylaminoethyl heptyl ester', 'Cholesta-3,5-diene (izomer 2)',
+    'Cholesta-3,5-dien-7-one', 'Cholesta-4,6-dien-3-one', 'Cholest-4-en-3-one', 'Hexadecanoic acid, octadecyl ester']
+    
+#13 SIGNIFICANT COMPOUNDS
+#significant_names = [
+#'Heptacosane', 'Tetradecane, 1-chloro-', '2,5-pyrrolidinedione, 3-decyl-', '2,5-pyrrolidinedione, 3-dodecyl-',
+#    '2,5-pyrrolidinedione, 3-tetradecyl-', 'Squalene', 'Cholesterol', 'Hexadecanoic acid, dodecyl ester',
+#    '9-Hexadecenoic acid, tetradecyl ester', 'Hexadecanoic acid, tetradecyl ester', '9-Hexadecenoic acid, hexadecyl ester',
+#    'Hexadecanoic acid, hexadecyl ester', '9-Hexadecenoic acid, octadecyl ester']
+
+
+first_file = 'F2_01'
+second_file = 'F2_06'
+files = ['', '']
+for file in os.listdir():
+    if file.endswith(".txt") and first_file in file:
+        files[0] = f"{path}/{file}"
+    elif file.endswith(".txt") and second_file in file:
+        files[1] = f"{path}/{file}"
+
+for file_path in files:
+    with open(file_path, 'r') as f:
+        contents = f.readlines()
+    contents.pop(0)
+    for line in contents:
+        lst = line.rsplit()
+        name = str(lst[0])
+        n = 1
+        frst_d = 0
+        while frst_d == 0:
+            while True:
+                try:
+                    frst_d = int(lst[n])
+                    break
+                except ValueError:
+                    name = name + ' ' + lst[n]
+                    n += 1
+            if frst_d < 10:
+                frst_d = 0
+                name = name + ' ' + lst[n]
+                n += 1
+
+        snd_d = float(lst[n + 1].replace(',', '.'))
+        if name in significant_names:
+            if first_file in file_path:
+                names.append(name)
+                input_points.append([frst_d, snd_d])
+                x_values[0].append(frst_d)
+                y_values[0].append(snd_d)
+            else:
+                if name not in names:
+                    names.append(name)
+                if names.index(name) == index:
+                    output_points.append([frst_d, snd_d])
+                    x_values[1].append(frst_d)
+                    y_values[1].append(snd_d)
+                    index += 1
+                elif names.index(name) > index:
+                    while index < names.index(name):
+                        output_points.append([0, 0])
+                        x_values[1].append(0)
+                        y_values[1].append(0)
+                        index += 1
+                    output_points.append([frst_d, snd_d])
+                    x_values[1].append(frst_d)
+                    y_values[1].append(snd_d)
+                    index += 1
+                elif names.index(name) < index:
+                    output_points[names.index(name)] = [frst_d, snd_d]
+                    x_values[1][names.index(name)] = frst_d
+                    y_values[1][names.index(name)] = snd_d
+        else:
+            if first_file in file_path:
+                insign_names.append(name)
+                input_insign.append([frst_d, snd_d])
+            else:
+                if name in insign_names:
+                    if insign_names.index(name) == insign_index:
+                        output_insign.append([frst_d, snd_d])
+                        insign_index+=1
+                    elif insign_names.index(name) > insign_index:
+                        while insign_index < insign_names.index(name):
+                            output_insign.append([0, 0])
+                            insign_index +=1
+                        output_insign.append([frst_d, snd_d])
+                        insign_index += 1
+                    elif insign_names.index(name) < insign_index:
+                        output_insign[insign_names.index(name)] = [frst_d, snd_d]
+
+
+for i in range(len(x_values[1])):
+    if x_values[1][i] == 0:
+        x_values[1].pop(i)
+        y_values[1].pop(i)
+        input_points.append(input_points[i])
+        input_points.pop(i)
+        insign_names.append(insign_names[i])
+        insign_names.pop(i)
+        output_points.pop(i)
+        break
+
+delete_index = []
+for j in range(len(output_insign)):
+    if output_insign[j][0] == 0 or output_insign[j][1] == 0:
+        input_insign.append(input_insign[j])
+        delete_index.append(j)
+
+n = 0
+for i in range(len(delete_index)):
+    input_insign.pop(delete_index[i] - n)
+    output_insign.pop(delete_index[i] - n)
+    n += 1
+
+x_insign = create_list(input_insign, output_insign, 0)
+y_insign = create_list(input_insign, output_insign, 1)
+
+x_values = create_list(input_points, output_points, 0)
+y_values = create_list(input_points, output_points, 1)
+
+x_difference, y_difference = [], []
+y_final, x_final = [], []
+
+
+rng = len(output_points)
+if len(output_points) > len(input_points):
+    rng = len(input_points)
+
+for j in range(len(output_insign)):
+    input_point = input_insign[j]
+    lengths = []
+    for dot in range(rng):
+        vector = [input_points[dot][0] - input_point[0], input_points[dot][1] - input_point[1]]
+        lengths.append(length(vector))
+
+    min_lengths, length_sorted = [], []
+    length_sorted = sorted(lengths)
+    min_index = []
+    #3 CLOSEST WITH EXCEPTIONS
+    for i in range(3):
+        min_lengths.append(length_sorted[i])
+        min_index.append(lengths.index(length_sorted[i]))
+
+    #3 CLOSEST WITH EXCEPTIONS
+    #av_l = sum(lengths) / (len(lengths) * 3)
+    #for i in range(3):
+    #    if length_sorted[i] <= av_l:
+    #        min_lengths.append(length_sorted[i])
+    #        min_index.append(lengths.index(length_sorted[i]))
+    #if len(min_lengths) == 0:
+    #    min_lengths.append(length_sorted[0])
+    #    min_index.append(lengths.index(length_sorted[0]))
+
+    start_values, end_values = [], []
+    for i in min_index:
+        start_values.append(input_points[i])
+        end_values.append(output_points[i])
+
+    end_x, end_y = 0, 0
+
+    end_points = []
+    for p in range(len(end_values)):
+        end_points.append(
+            [input_point[0] - start_values[p][0] + end_values[p][0],
+             input_point[1] - start_values[p][1] + end_values[p][1]])
+
+    weights = []
+    s = sum(min_lengths)
+    for l in min_lengths:
+        if len(min_lengths) != 1:
+            w = (s - l) / ((len(min_lengths) - 1) * s)
+        else:
+            w = 1
+        weights.append(w)
+
+    for i in range(len(weights)):
+        end_x += weights[i] * end_points[i][0]
+        end_y += weights[i] * end_points[i][1]
+
+
+    end_coord = [end_x, end_y]
+
+    x_final.append(end_coord[0])
+    y_final.append(end_coord[1])
+    actual_x = output_insign[input_insign.index(input_point)][0]
+    actual_y = output_insign[input_insign.index(input_point)][1]
+    x_difference.append(end_x - actual_x)
+    y_difference.append(end_y - actual_y)
+
+av_x_error = abs(sum(x_difference) / len(x_difference))
+av_y_error = abs(sum(y_difference) / len(y_difference))
+print('t1 =', av_x_error,
+      '\nt2 =', av_y_error)
+
+fig, ax = plt.subplots()
+ax.scatter(x_values[0], y_values[0], s=20, color = 'g', alpha=0.5, edgecolor='black', linewidth=0.1)
+ax.scatter(x_values[1], y_values[1], s=70, marker = '*', color = 'g', alpha=0.5, edgecolor='black', linewidth=0.1)
+ax.scatter(x_insign[0], y_insign[0], s=10, color = 'r', alpha=0.5, edgecolor='black', linewidth=0.1)
+ax.scatter(x_final, y_final, s=70, marker = '*', color = 'red', edgecolor='black', linewidth=0.1)
+ax.scatter(x_insign[1], y_insign[1], s=20, color = 'b', alpha=0.5, edgecolor='black', linewidth=0.1)
+
+for i in range(rng):
+    plt.plot([input_points[i][0], output_points[i][0]], [input_points[i][1], output_points[i][1]], color = 'g', alpha=0.5)
+
+for i in range(len(x_final)):
+    plt.plot([x_final[i], x_insign[0][i]], [y_final[i], y_insign[0][i]], color = 'r', linestyle = '--')
+
+
+ax.set_xlabel('1st dimension')
+ax.set_ylabel('2nd dimension')
+ax.set_title(first_file + '&' +second_file + ' shift prediction, weighted')
+ax.legend(['sign. c. start', 'sign. c. end', 'insign. c. starting point',
+           'insign. c. predicted ending point', 'insign. c. actual ending point'])
+ax.grid(True)
+plt.show()
