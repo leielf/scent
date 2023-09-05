@@ -253,7 +253,10 @@ for system in systems:
             weights = []
             s = sum(min_lengths)
             for l in min_lengths:
-                w = (s - l) / (2 * s)
+                if len(min_lengths) != 1:
+                    w = (s - l) / ((len(min_lengths) - 1) * s)
+                else:
+                    w = 1
                 weights.append(w)
 
             for i in range(len(weights)):
