@@ -211,6 +211,7 @@ for key, value in insignificant_compounds.items():
                 abc1.append((s - d) / s)
             else:
                 abc1.append(1)
+        
         x, y = 0, 0
         math_sqrt_x, math_sqrt_y = 0, 0
         for i in range(len(abc1)):
