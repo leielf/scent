@@ -213,12 +213,10 @@ for key, value in insignificant_compounds.items():
                 abc1.append(1)
         
         x, y = 0, 0
-        math_sqrt_x, math_sqrt_y = 0, 0
-        for i in range(len(abc1)):
-            math_sqrt_x += math.pow(value[0][0] - start_values[i][0] + end_values[i][0], 2) * abc1[i]
-            math_sqrt_y += math.pow(value[1][0] - start_values[i][1] + end_values[i][1], 2) * abc1[i]
-        x = math.sqrt(math_sqrt_x)
-        y = math.sqrt(math_sqrt_y)
+        for i in range(len(end_values)):
+            x += abc1[i] * (insign_start[p][0] - start_values[i][0] + end_values[i][0])
+            y += abc1[i] * (insign_start[p][1] - start_values[i][1] + end_values[i][1])
+
 
 
         add_compound(insignificant_predicted, key, value[0][0], value[1][0], 2)
